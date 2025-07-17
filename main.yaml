@@ -1,0 +1,82 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Parameters:
+
+  S3BaseUrl:
+    Type: String
+    Description: "Base URL for S3 Bucket (https://my-bucket.s3.amazonaws.com/stacks/)"
+
+  MyAmiId:
+    Type: String
+    Description: AMI ID for Instances
+
+  MyBucketName:
+    Type: String
+    Description: Name of S3 Bucket for Static Hosting
+
+  MyDbUsername:
+    Type: String
+    Description: Username for Aurora Database
+
+  MyDbPassword: 
+    Type: String
+    Description: Password for Aurora Database
+
+
+Resources:
+
+  NetworkStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "${S3BaseUrl}network.yaml"
+
+  SecurityStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "${S3BaseUrl}security.yaml"
+      Parameters: 
+        MyVpcId: !GetAtt NetworkStack.Outputs.VpcId
+
+  LoadBalancerStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "${S3BaseUrl}loadbalancer.yaml"
+      Parameters:
+        MyVpcId: !GetAtt NetworkStack.Outputs.VpcId
+        MyPublicSubnet1Id: !GetAtt NetworkStack.Outputs.PublicSubnet1Id
+        MyPublicSubnet2Id: !GetAtt NetworkStack.Outputs.PublicSubnet2Id
+        MyAlbSgId: !GetAtt SecurityStack.Outputs.AlbSgId
+
+  ComputeStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "${S3BaseUrl}compute.yaml"
+      Parameters:
+        MyPrivateSubnet1Id: !GetAtt NetworkStack.Outputs.PrivateSubnet1Id
+        MyPrivateSubnet2Id: !GetAtt NetworkStack.Outputs.PrivateSubnet2Id
+        MyTargetGroupArn: !GetAtt LoadBalancerStack.Outputs.TargetGroupArn
+        MyEc2SgId: !GetAtt SecurityStack.Outputs.Ec2SgId
+        MyAmiId: !Ref MyAmiId
+
+  BucketStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "${S3BaseUrl}bucket.yaml"
+      Parameters:
+        MyBucketName: !Ref MyBucketName
+
+  DatabaseStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "${S3BaseUrl}database.yaml"
+      Parameters:
+          MyPrivateSubnet1Id: !GetAtt NetworkStack.Outputs.PrivateSubnet1Id
+          MyPrivateSubnet2Id: !GetAtt NetworkStack.Outputs.PrivateSubnet2Id
+          MyAuroraSgId: !GetAtt SecurityStack.Outputs.AuroraSgId
+          MyDbUsername: !Ref MyDbUsername
+          MyDbPassword: !Ref MyDbPassword
+
+ 
+
+
+ 

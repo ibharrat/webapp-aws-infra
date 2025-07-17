@@ -1,0 +1,47 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Parameters:
+
+  MyPrivateSubnet1Id:
+    Type: AWS::EC2::Subnet::Id
+
+  MyPrivateSubnet2Id:
+    Type: AWS::EC2::Subnet::Id
+
+  MyTargetGroupArn:
+    Type: String
+
+  MyEc2SgId:
+    Type: String 
+
+  MyAmiId:
+    Type: String
+
+
+Resources:
+  
+  MyASG:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties: 
+      AutoScalingGroupName: ASG
+      MinSize: 1
+      MaxSize: 2
+      DesiredCapacity: 1
+      VPCZoneIdentifier:
+        - !Ref MyPrivateSubnet1Id
+        - !Ref MyPrivateSubnet2Id
+      TargetGroupARNs: 
+        - !Ref MyTargetGroupArn
+      LaunchTemplate:
+          LaunchTemplateId: !Ref MyLaunchTemplate
+          Version: !GetAtt MyLaunchTemplate.LatestVersionNumber    
+
+  MyLaunchTemplate:
+    Type: AWS::EC2::LaunchTemplate
+    Properties:
+      LaunchTemplateName: Launch
+      LaunchTemplateData:
+        ImageId: !Ref MyAmiId 
+        InstanceType: t2.micro
+        SecurityGroupIds: 
+          - !Ref MyEc2SgId

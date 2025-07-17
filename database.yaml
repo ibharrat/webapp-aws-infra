@@ -1,0 +1,51 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Parameters:
+
+  MyPrivateSubnet1Id:
+    Type: AWS::EC2::Subnet::Id
+
+  MyPrivateSubnet2Id:
+    Type: AWS::EC2::Subnet::Id
+
+  MyAuroraSgId:
+    Type: String 
+
+  MyDbUsername:
+    Type: String
+  
+  MyDbPassword:
+    Type: String
+
+
+Resources:
+
+  MyDBSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: Subnet group for Aurora
+      SubnetIds:
+        - !Ref MyPrivateSubnet1Id
+        - !Ref MyPrivateSubnet2Id
+      Tags:
+        - Key: Name
+          Value: MyDBSubnetGroup
+
+  MyAuroraCluster:
+    Type: AWS::RDS::DBCluster
+    Properties:
+      Engine: aurora-mysql
+      EngineMode: serverless-v2
+      DBClusterIdentifier: MyAuroraCluster
+      MasterUsername: !Ref MyDbUsername
+      MasterUserPassword: !Ref MyDbPassword
+      DBSubnetGroupName: !Ref MyDBSubnetGroup
+      VpcSecurityGroupIds:
+        - !Ref MyAuroraSgId
+      ServerlessV2ScalingConfiguration:
+        MinCapacity: 0.5
+        MaxCapacity: 2
+      StorageEncrypted: true
+      DeletionProtection: false
+      BackupRetentionPeriod: 1
+      PubliclyAccessible: false

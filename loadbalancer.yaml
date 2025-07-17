@@ -1,0 +1,54 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Parameters:
+
+  MyVpcId:
+    Type: AWS::EC2::VPC::Id
+
+  MyPublicSubnet1Id:
+    Type: AWS::EC2::Subnet::Id
+
+  MyPublicSubnet2Id:
+    Type: AWS::EC2::Subnet::Id
+
+  MyAlbSgId:
+    Type: String 
+
+
+Resources:
+         
+  MyTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: MyTargetGroup
+      Port: 80
+      Protocol: HTTP
+      VpcId: !Ref MyVpcId
+      TargetType: instance 
+
+  MyAlb:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer 
+    Properties: 
+      Name: MyAlb
+      Scheme: internet-facing
+      Subnets:
+        - !Ref MyPublicSubnet1Id
+        - !Ref MyPublicSubnet2Id
+      SecurityGroups: 
+        - !Ref MyAlbSgId
+
+  MyALBListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties: 
+      LoadBalancerArn: !Ref MyAlb
+      Port: 80
+      Protocol: HTTP
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref MyTargetGroup
+
+
+Outputs:
+
+  TargetGroupArn: 
+    Value: !Ref MyTargetGroup

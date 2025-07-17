@@ -1,0 +1,64 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Parameters:
+
+  MyVpcId:
+    Type: AWS::EC2::VPC::Id
+
+
+Resources:
+
+  AlbSecurity:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow inbound traffic at port 80 from anyone for api  
+      VpcId: !Ref MyVpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          CidrIp: 0.0.0.0/0  
+
+
+  EC2Security:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow inbound traffic at port 80 from MyAlb
+      VpcId: !Ref MyVpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          SourceSecurityGroupId: !Ref AlbSecurity
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          CidrIp: 0.0.0.0/0
+
+  AuroraSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow inbound traffic on DB port from EC2 instances
+      VpcId: !Ref MyVpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 3306         
+          ToPort: 3306
+          SourceSecurityGroupId: !Ref EC2Security
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          CidrIp: 0.0.0.0/0
+
+
+Outputs:
+
+  AlbSgId:
+    Value: !Ref AlbSecurity
+
+  Ec2SgId:
+    Value: !Ref EC2Security
+
+  AuroraSgId:
+    Value: !Ref AuroraSecurityGroup

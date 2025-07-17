@@ -1,0 +1,127 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Resources:
+
+  MyVpc:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 172.31.0.0/16
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: Name
+          Value: MyVpc
+
+  MyInternetGateway:
+    Type: AWS::EC2::InternetGateway
+  
+  AttachGateway:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref MyVpc
+      InternetGatewayId: !Ref MyInternetGateway
+
+  MyPublicSubnet1:
+    Type: AWS::EC2::Subnet 
+    Properties:
+      VpcId: !Ref MyVpc
+      CidrBlock: 172.31.1.0/24
+      AvailabilityZone: us-east-2a
+      MapPublicIpOnLaunch: true
+      Tags: 
+        - Key: Name
+          Value: MyPublicSubnet1
+
+  MyPublicSubnet2:
+    Type: AWS::EC2::Subnet 
+    Properties:
+      VpcId: !Ref MyVpc
+      CidrBlock: 172.31.2.0/24
+      AvailabilityZone: us-east-2b
+      MapPublicIpOnLaunch: true
+      Tags: 
+        - Key: Name
+          Value: MyPublicSubnet2
+
+  MyPublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref MyVpc
+
+  MyPublicRoute: 
+    Type: AWS::EC2::Route 
+    Properties:
+      RouteTableId: !Ref MyPublicRouteTable 
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref MyInternetGateway 
+
+  PublicSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref MyPublicSubnet1
+      RouteTableId: !Ref MyPublicRouteTable
+
+  PublicSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref MyPublicSubnet2
+      RouteTableId: !Ref MyPublicRouteTable
+
+  MyPrivateSubnet1:
+    Type: AWS::EC2::Subnet 
+    Properties:
+      VpcId: !Ref MyVpc
+      CidrBlock: 172.31.3.0/24
+      AvailabilityZone: us-east-2a
+      MapPublicIpOnLaunch: false
+      Tags: 
+        - Key: Name
+          Value: MyPrivateSubnet1
+
+  MyPrivateSubnet2:
+    Type: AWS::EC2::Subnet 
+    Properties:
+      VpcId: !Ref MyVpc   
+      CidrBlock: 172.31.4.0/24
+      AvailabilityZone: us-east-2b
+      MapPublicIpOnLaunch: false
+      Tags: 
+        - Key: Name
+          Value: MyPrivateSubnet2
+
+  MyPrivateRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref MyVpc
+
+  PrivateSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref MyPrivateSubnet1
+      RouteTableId: !Ref MyPrivateRouteTable
+
+  PrivateSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref MyPrivateSubnet2
+      RouteTableId: !Ref MyPrivateRouteTable
+
+
+  
+
+Outputs:
+  
+  VpcId:
+    Value: !Ref MyVpc
+
+  PublicSubnet1Id: 
+    Value: !Ref MyPublicSubnet1
+
+  PublicSubnet2Id: 
+    Value: !Ref MyPublicSubnet2
+
+  PrivateSubnet1Id: 
+    Value: !Ref MyPrivateSubnet1
+
+  PrivateSubnet2Id: 
+    Value: !Ref MyPrivateSubnet2
