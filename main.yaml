@@ -76,6 +76,15 @@ Resources:
           MyDbUsername: !Ref MyDbUsername
           MyDbPassword: !Ref MyDbPassword
 
+
+  CloudFrontStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "${S3BaseUrl}cloudfront.yaml"
+      Parameters:
+        MyBucketRegionalDomainName: !GetAtt BucketStack.Outputs.BucketRegionalDomainName
+        MyAlbDnsName: !GetAtt LoadBalancerStack.Outputs.AlbDnsName
+
  
 
 

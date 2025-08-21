@@ -30,3 +30,9 @@ Resources:
             Principal: "*"
             Action: s3:GetObject
             Resource: !Sub "${StaticSiteBucket.Arn}/*"
+
+
+Outputs:
+
+  BucketRegionalDomainName:
+    Value: !GetAtt StaticSiteBucket.RegionalDomainName

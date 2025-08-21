@@ -52,3 +52,6 @@ Outputs:
 
   TargetGroupArn: 
     Value: !Ref MyTargetGroup
+
+  AlbDnsName:
+    Value: !GetAtt MyAlb.DNSName
