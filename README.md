@@ -1,4 +1,4 @@
-# CloudFormation Lab Template
+# CloudFormation Template
 
 Deploys a test environment with:
 - S3 bucket for frontend
