@@ -34,7 +34,7 @@ Resources:
   MyAuroraCluster:
     Type: AWS::RDS::DBCluster
     Properties:
-      Engine: aurora-mysql
+      Engine: aurora-postgresql
       EngineMode: serverless-v2
       DBClusterIdentifier: MyAuroraCluster
       MasterUsername: !Ref MyDbUsername
